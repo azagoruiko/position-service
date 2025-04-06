@@ -1,4 +1,4 @@
-package com.example;
+package zaico;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction;

@@ -1,4 +1,4 @@
-package com.example;
+package zaico;
 
 import io.micronaut.runtime.Micronaut;
 

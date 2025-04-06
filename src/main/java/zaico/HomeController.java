@@ -1,4 +1,4 @@
-package com.example;
+package zaico;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;

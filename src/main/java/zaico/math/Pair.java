@@ -20,12 +20,31 @@ public record Pair(String asset, String quote, BigDecimal commission) {
         } else throw new IllegalArgumentException(String.format("%s, is not a valid asset of %s", of, this));
     }
 
+    public BigDecimal buyWithQuote(BigDecimal quoteAmount, BigDecimal price) {
+        return buy(quoteAmount, quote, price);
+    }
+
+    public BigDecimal sellForQuote(BigDecimal assetAmount, BigDecimal price) {
+        return sell(assetAmount, asset, price);
+    }
+
+
+    public String name() {
+        return STR."\{asset}_\{quote}";
+    }
+
     @Override
     public String toString() {
-        return "Pair{" +
-                "asset='" + asset + '\'' +
-                ", quote='" + quote + '\'' +
-                ", commission=" + commission +
-                '}';
+        return name();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Pair p) && asset.equals(p.asset) && quote.equals(p.quote);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * asset.hashCode() + quote.hashCode();
     }
 }

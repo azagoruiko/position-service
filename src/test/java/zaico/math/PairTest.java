@@ -63,4 +63,26 @@ class PairTest {
         );
         assertTrue(ex.getMessage().contains("is not a valid asset"));
     }
+
+    @Test
+    void testBuyWithQuoteAlias() {
+        BigDecimal usdt = new BigDecimal("10000");
+        BigDecimal price = new BigDecimal("20000");
+
+        BigDecimal expectedBtc = Calc.amount(usdt, price, pair.commission());
+        BigDecimal actualBtc = pair.buyWithQuote(usdt, price);
+
+        assertEquals(0, expectedBtc.compareTo(actualBtc));
+    }
+
+    @Test
+    void testSellForQuoteAlias() {
+        BigDecimal btc = new BigDecimal("0.5");
+        BigDecimal price = new BigDecimal("20000");
+
+        BigDecimal expectedUsdt = Calc.size(btc, price, pair.commission());
+        BigDecimal actualUsdt = pair.sellForQuote(btc, price);
+
+        assertEquals(0, expectedUsdt.compareTo(actualUsdt));
+    }
 }

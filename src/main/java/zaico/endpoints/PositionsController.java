@@ -1,7 +1,6 @@
 package zaico.endpoints;
 
 import com.binance.connector.futures.client.impl.UMFuturesClientImpl;
-import com.binance.connector.futures.client.impl.CMFuturesClientImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -14,8 +13,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
-import zaico.client.binance.model.FuturesPosition;
-import zaico.model.Position;
+import zaico.model.FuturesSnapshot;
 
 @Controller("/futures")
 public class PositionsController {
@@ -25,15 +23,15 @@ public class PositionsController {
     BinanceClientProvider binanceClientProvider;
 
     @Get("/positions")
-    public List<FuturesPosition> getPositions() throws JsonProcessingException {
-        UMFuturesClientImpl client = binanceClientProvider.getFuturesClient();
+    public List<FuturesSnapshot> getPositions() throws JsonProcessingException {
+        UMFuturesClientImpl client = binanceClientProvider.getuFuturesClient();
         String rawJson = client
                 .account().positionInformation(new LinkedHashMap<>());
-        List<FuturesPosition> allPositions = mapper.readValue(
+        List<FuturesSnapshot> allPositions = mapper.readValue(
                 rawJson, new TypeReference<>() {}
         );
 
-        List<FuturesPosition> positions = allPositions.stream()
+        List<FuturesSnapshot> positions = allPositions.stream()
                 .filter(p -> p.positionAmt().compareTo(BigDecimal.ZERO) != 0)
                 .toList();
 

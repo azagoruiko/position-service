@@ -1,12 +1,11 @@
-package zaico.client.binance.model;
+package zaico.client.binance.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
-import zaico.model.Position;
 
 import java.math.BigDecimal;
 
 @Serdeable
-public record FuturesPosition(
+public record BinanceFuturesPosition(
         String symbol,
         BigDecimal positionAmt,
         BigDecimal entryPrice,

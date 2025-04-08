@@ -21,7 +21,7 @@ public class BinanceTradeService {
     public BinanceTradeService(BinanceClientProvider clientProvider) {
         this.spotClient = clientProvider.getSpotClient();
         this.uFuturesClient = clientProvider.getuFuturesClient();
-        this.cFuturesClient = clientProvider.getuFuturesClient();
+        this.cFuturesClient = clientProvider.getcFuturesClient();
     }
 
     public String getSpotTrades(String symbol) {
@@ -33,6 +33,7 @@ public class BinanceTradeService {
         LinkedHashMap<String, Object> params = new LinkedHashMap<>(Map.of("symbol", symbol));
         var rawTrades = uFuturesClient.account().accountTradeList(params);
         List<FuturesTrade> trades = BinanceTradeParser.parseFuturesTrades(rawTrades);
+        params = new LinkedHashMap<>(Map.of("symbol", "ETHUSD_PERP"));
         rawTrades = cFuturesClient.account().accountTradeList(params);
         trades.addAll(BinanceTradeParser.parseFuturesTrades(rawTrades));
         return trades;

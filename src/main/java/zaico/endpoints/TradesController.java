@@ -20,7 +20,7 @@ public class TradesController {
     @Get("/trades")
     public List<FuturesTrade> getTrades() throws JsonProcessingException {
 
-        return binanceTradeService.getFuturesTrades("SOLUSDT");
+        return binanceTradeService.getFuturesTrades("ETHUSDT");
     }
 }
 

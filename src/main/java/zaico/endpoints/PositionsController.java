@@ -32,7 +32,7 @@ public class PositionsController {
         );
 
         List<FuturesSnapshot> positions = allPositions.stream()
-                .filter(p -> p.positionAmt().compareTo(BigDecimal.ZERO) != 0)
+                .filter(p -> p.size().compareTo(BigDecimal.ZERO) != 0)
                 .toList();
 
         return positions;

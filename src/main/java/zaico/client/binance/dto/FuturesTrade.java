@@ -7,9 +7,12 @@ import java.math.BigDecimal;
 @Serdeable
 public record FuturesTrade(
         String symbol,
+        String marginAsset,
+        String baseQty,
         long id,
         long orderId,
         String side,
+        String pair,
         BigDecimal price,
         BigDecimal qty,
         BigDecimal realizedPnl,

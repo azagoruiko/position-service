@@ -30,7 +30,7 @@ public record Pair(String asset, String quote, BigDecimal commission) {
 
 
     public String name() {
-        return String.format("%s_$s", asset, quote);
+        return String.format("%s_%s", asset, quote);
     }
 
     @Override

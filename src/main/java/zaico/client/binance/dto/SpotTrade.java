@@ -1,19 +1,22 @@
-package zaico.model;
+package zaico.client.binance.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.math.BigDecimal;
 
 @Serdeable
-public record Trade(
+public record SpotTrade(
         String symbol,
-        MarketType marketType,         // SPOT / FUTURES
-        TradeSide side,               // BUY / SELL
-        BigDecimal qty,
+        long id,
+        long orderId,
+        long orderListId,
         BigDecimal price,
+        BigDecimal qty,
         BigDecimal quoteQty,
         BigDecimal commission,
         String commissionAsset,
         long time,
-        String sourceOrderId
+        boolean isBuyer,
+        boolean isMaker,
+        boolean isBestMatch
 ) {}

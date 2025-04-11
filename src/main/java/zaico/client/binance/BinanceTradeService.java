@@ -12,16 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 @Singleton
-public class BinanceTradeService {
-
-    private final SpotClientImpl spotClient;
-    private final FuturesClientImpl uFuturesClient;
-    private final FuturesClientImpl cFuturesClient;
+public class BinanceTradeService extends AbstractBinanceService {
 
     public BinanceTradeService(BinanceClientProvider clientProvider) {
-        this.spotClient = clientProvider.getSpotClient();
-        this.uFuturesClient = clientProvider.getuFuturesClient();
-        this.cFuturesClient = clientProvider.getcFuturesClient();
+        super(clientProvider);
     }
 
     public String getSpotTrades(String symbol) {

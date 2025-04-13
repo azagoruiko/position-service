@@ -1,41 +1,40 @@
 package zaico.endpoints;
 
-import com.binance.connector.futures.client.impl.UMFuturesClientImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.QueryValue;
 import jakarta.inject.Inject;
-import zaico.client.binance.BinanceClientProvider;
-
-import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+import zaico.client.binance.BinancePositionService;
+import zaico.client.binance.MarketRegistry;
 import zaico.model.FuturesSnapshot;
+import zaico.math.Pair;
+import zaico.model.MarketType;
 
-@Controller("/futures")
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+@Controller("/facts")
 public class PositionsController {
-    @Inject ObjectMapper mapper;
 
     @Inject
-    BinanceClientProvider binanceClientProvider;
+    BinancePositionService positionService;
+
+    @Inject
+    MarketRegistry marketRegistry;
 
     @Get("/positions")
-    public List<FuturesSnapshot> getPositions() throws JsonProcessingException {
-        UMFuturesClientImpl client = binanceClientProvider.getuFuturesClient();
-        String rawJson = client
-                .account().positionInformation(new LinkedHashMap<>());
-        List<FuturesSnapshot> allPositions = mapper.readValue(
-                rawJson, new TypeReference<>() {}
-        );
+    public List<FuturesSnapshot> getPositions(
+            @QueryValue Optional<String> asset,
+            @QueryValue Optional<String> quote
+    ) {
+        if (asset.isPresent() && quote.isPresent()) {
+            Pair pairUSDT = marketRegistry.getPair(asset.get(), quote.get(), MarketType.FUTURES_USDT);
 
-        List<FuturesSnapshot> positions = allPositions.stream()
-                .filter(p -> p.size().compareTo(BigDecimal.ZERO) != 0)
-                .toList();
+            List<FuturesSnapshot> result = positionService.getOpenPositions(pairUSDT);
+            return result;
+        }
 
-        return positions;
+        return Collections.emptyList();
     }
 }
-

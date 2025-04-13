@@ -5,7 +5,9 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
 import jakarta.inject.Inject;
 import zaico.client.binance.BinanceTradeService;
+import zaico.client.binance.MarketRegistry;
 import zaico.math.Pair;
+import zaico.model.MarketType;
 import zaico.model.Trade;
 
 import java.math.BigDecimal;
@@ -19,20 +21,26 @@ public class TradesController {
 
     @Inject
     BinanceTradeService binanceTradeService;
+    @Inject
+    MarketRegistry marketRegistry;
+
 
     @Get("/trades")
     public List<Trade> getTrades(
             @QueryValue Optional<String> asset,
             @QueryValue Optional<String> quote,
-            @QueryValue Optional<BigDecimal> commission,
             @QueryValue Optional<String> from // ISO8601: 2024-12-31T23:59:59Z
     ) {
         if (asset.isPresent() && quote.isPresent()) {
-            Pair pair = new Pair(
+            Pair pair = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(),
-                    commission.orElse(BigDecimal.ZERO)
-            );
+                    quote.get(), MarketType.SPOT);
+            Pair pairFuturesM = marketRegistry.getPair(
+                    asset.get(),
+                    quote.get(), MarketType.FUTURES_USDT);
+            Pair pairFuturesC = marketRegistry.getPair(
+                    asset.get(),
+                    quote.get(), MarketType.FUTURES_COIN);
 
             return from
                     .map(Instant::parse)

@@ -1,16 +1,16 @@
-package zaico.model;
+package zaico.client.binance.dto;
 
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 @Serdeable
-public record FundingEntry(
+public record FuturesFundingEntry(
         String symbol,
-        BigDecimal amount,
+        String incomeType,
+        BigDecimal income,
         String asset,
-        Instant time,
+        long time,
         String info,
         long tranId
 ) {}

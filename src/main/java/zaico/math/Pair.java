@@ -2,7 +2,11 @@ package zaico.math;
 
 import java.math.BigDecimal;
 
-public record Pair(String asset, String quote, BigDecimal commission) {
+public record Pair(String asset, String quote, BigDecimal commission, String symbol) {
+
+    public Pair(String asset, String quote, BigDecimal commission) {
+        this(asset, quote, commission, String.format("%s%s", asset, quote));
+    }
 
     public BigDecimal buy(BigDecimal amount, String of, BigDecimal price) {
         if (of.equals(asset)) {
@@ -29,22 +33,18 @@ public record Pair(String asset, String quote, BigDecimal commission) {
     }
 
 
-    public String name() {
-        return String.format("%s_%s", asset, quote);
-    }
-
     @Override
     public String toString() {
-        return name();
+        return symbol;
     }
 
     @Override
     public boolean equals(Object o) {
-        return (o instanceof Pair p) && asset.equals(p.asset) && quote.equals(p.quote);
+        return (o instanceof Pair p) && asset.equals(p.asset) && quote.equals(p.quote) && quote.equals(p.symbol) ;
     }
 
     @Override
     public int hashCode() {
-        return 31 * asset.hashCode() + quote.hashCode();
+        return 31 * asset.hashCode() + quote.hashCode() + symbol.hashCode();
     }
 }

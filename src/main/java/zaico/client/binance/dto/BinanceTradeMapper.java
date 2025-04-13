@@ -20,10 +20,10 @@ public class BinanceTradeMapper {
         );
     }
 
-    public static Trade fromFutures(FuturesTrade t) {
+    public static Trade fromFutures(FuturesTrade t, MarketType mType) {
         return new Trade(
                 t.symbol(),
-                MarketType.FUTURES,
+                mType,
                 "BUY".equalsIgnoreCase(t.side()) ? TradeSide.BUY : TradeSide.SELL,
                 t.qty(),
                 t.price(),

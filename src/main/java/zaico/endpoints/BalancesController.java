@@ -24,8 +24,14 @@ public class BalancesController {
         return balanceService.getFuturesBalances(FuturesType.USDT);
     }
 
+
     @Get("/futures/coin")
     public List<WalletBalance> coinFutures() {
         return balanceService.getFuturesBalances(FuturesType.COIN);
     }
+    @Get("/earn/simple")
+    public List<WalletBalance> simpleEarn() {
+        return balanceService.getEarnBalances();
+    }
+
 }

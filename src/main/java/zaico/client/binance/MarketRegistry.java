@@ -43,12 +43,14 @@ public class MarketRegistry {
             case SPOT -> BinanceSymbol.getSpotSymbol(asset, quote);
             case FUTURES_USDT -> BinanceSymbol.getFuturesSymbol(asset, quote, FuturesType.USDT);
             case FUTURES_COIN -> BinanceSymbol.getFuturesSymbol(asset, quote, FuturesType.COIN);
+            case EARN -> null;
         };
 
         BigDecimal commission = switch (type) {
             case SPOT -> binanceCommissionService.getSpotTakerFee(symbol);
             case FUTURES_USDT -> binanceCommissionService.getFuturesTakerFee(FuturesType.USDT, symbol);
             case FUTURES_COIN -> binanceCommissionService.getFuturesTakerFee(FuturesType.COIN, symbol);
+            case EARN -> BigDecimal.ZERO;
         };
 
         return new Pair(asset, quote, commission);
@@ -61,6 +63,7 @@ public class MarketRegistry {
             case SPOT -> spotSymbols.contains(symbol);
             case FUTURES_USDT -> usdtFuturesSymbols.contains(symbol);
             case FUTURES_COIN -> coinFuturesSymbols.contains(symbol);
+            case EARN -> true;
         };
     }
 

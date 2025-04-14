@@ -8,6 +8,7 @@ import jakarta.inject.Singleton;
 import zaico.client.binance.dto.*;
 import zaico.model.MarketType;
 import zaico.model.WalletBalance;
+import zaico.model.WalletTransaction;
 
 import java.util.*;
 
@@ -55,6 +56,23 @@ public class BinanceBalanceService extends AbstractBinanceService {
                     .toList();
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch futures balances", e);
+        }
+    }
+
+    public List<WalletBalance> getEarnBalances() {
+        try {
+            String raw = spotClient.createSimpleEarn().simpleAccount(new LinkedHashMap<>());
+
+            List<BinanceEarnBalance> balances = objectMapper.readValue(
+                    raw, new TypeReference<>() {}
+            );
+
+            return balances.stream()
+                    .map(BinanceBalanceMapper::fromEarn)
+                    .toList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch Earn balances", e);
         }
     }
 }

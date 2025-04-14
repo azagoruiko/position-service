@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Singleton
-public class BinanceCommissionService {
+public class BinanceCommissionService implements zaico.exchange.service.CommissionService {
 
     private final BinanceClientProvider clientProvider;
     private final ObjectMapper objectMapper;
@@ -24,10 +24,12 @@ public class BinanceCommissionService {
         this.objectMapper = objectMapper;
     }
 
+    @Override
     public BigDecimal getSpotTakerFee(String symbol) {
         return spotTakerFees.computeIfAbsent(symbol, this::fetchSpotTakerFee);
     }
 
+    @Override
     public BigDecimal getFuturesTakerFee(FuturesType type, String symbol) {
         return futuresTakerFees
                 .computeIfAbsent(symbol, k -> new EnumMap<>(FuturesType.class))

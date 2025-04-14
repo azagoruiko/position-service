@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import zaico.client.binance.dto.*;
+import zaico.client.binance.dto.mapper.BinanceBalanceMapper;
 import zaico.model.MarketType;
 import zaico.model.WalletBalance;
-import zaico.model.WalletTransaction;
 
 import java.util.*;
 
-import static zaico.client.binance.dto.BinanceBalanceMapper.*;
 
 @Singleton
 public class BinanceBalanceService extends AbstractBinanceService {
@@ -52,7 +51,7 @@ public class BinanceBalanceService extends AbstractBinanceService {
 
             MarketType marketType = type.toMarketType();
             return assets.stream()
-                    .map(dto -> fromFutures(dto, marketType))
+                    .map(dto -> BinanceBalanceMapper.fromFutures(dto, marketType))
                     .toList();
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch futures balances", e);

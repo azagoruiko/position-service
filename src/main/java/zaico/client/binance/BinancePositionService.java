@@ -1,7 +1,7 @@
 package zaico.client.binance;
 
 import jakarta.inject.Singleton;
-import zaico.client.binance.dto.BinancePositionMapper;
+import zaico.client.binance.dto.mapper.BinancePositionMapper;
 import zaico.math.Pair;
 import zaico.model.FuturesSnapshot;
 import zaico.model.MarketType;
@@ -11,7 +11,7 @@ import java.util.*;
 import static zaico.client.binance.parser.BinancePositionParser.parseFuturesPositions;
 
 @Singleton
-public class BinancePositionService extends AbstractBinanceService {
+public class BinancePositionService extends AbstractBinanceService implements zaico.exchange.service.PositionService {
 
     public BinancePositionService(BinanceClientProvider clientProvider) {
         super(clientProvider);
@@ -28,6 +28,7 @@ public class BinancePositionService extends AbstractBinanceService {
                 .toList();
     }
 
+    @Override
     public List<FuturesSnapshot> getOpenPositions(Pair pair) {
         List<FuturesSnapshot> all = new ArrayList<>();
 

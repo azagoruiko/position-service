@@ -1,7 +1,7 @@
 package zaico.client.binance;
 
 import jakarta.inject.Singleton;
-import zaico.client.binance.dto.BinanceOrderMapper;
+import zaico.client.binance.dto.mapper.BinanceOrderMapper;
 import zaico.math.Pair;
 import zaico.model.MarketType;
 import zaico.model.Order;
@@ -9,11 +9,11 @@ import zaico.model.Order;
 import java.time.Instant;
 import java.util.*;
 
-import static zaico.client.binance.dto.BinanceOrderMapper.*;
+import static zaico.client.binance.dto.mapper.BinanceOrderMapper.*;
 import static zaico.client.binance.parser.BinanceOrderParser.*;
 
 @Singleton
-public class BinanceOrderService extends AbstractBinanceService {
+public class BinanceOrderService extends AbstractBinanceService implements zaico.exchange.service.OrderService {
 
     public BinanceOrderService(BinanceClientProvider clientProvider) {
         super(clientProvider);
@@ -52,15 +52,18 @@ public class BinanceOrderService extends AbstractBinanceService {
                 .toList();
     }
 
+    @Override
     public List<Order> getOrders(Pair pair) {
         return getOrders(pair, Optional.empty());
     }
 
+    @Override
     public List<Order> getOrders(Pair pair, Instant startTime) {
         return getOrders(pair, Optional.of(startTime));
     }
 
-    private List<Order> getOrders(Pair pair, Optional<Instant> startTime) {
+    @Override
+    public List<Order> getOrders(Pair pair, Optional<Instant> startTime) {
         List<Order> allOrders = new ArrayList<>();
 
         allOrders.addAll(fetchFuturesOrders(pair, FuturesType.USDT, startTime));

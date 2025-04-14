@@ -1,14 +1,14 @@
 package zaico.client.binance;
 
 import jakarta.inject.Singleton;
-import zaico.client.binance.dto.BinanceTradeMapper;
+import zaico.client.binance.dto.mapper.BinanceTradeMapper;
 import zaico.math.Pair;
 import zaico.model.Trade;
 
 import java.time.Instant;
 import java.util.*;
 
-import static zaico.client.binance.dto.BinanceTradeMapper.*;
+import static zaico.client.binance.dto.mapper.BinanceTradeMapper.*;
 import static zaico.client.binance.parser.BinanceTradeParser.*;
 
 @Singleton

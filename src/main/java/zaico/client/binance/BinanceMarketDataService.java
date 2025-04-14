@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Singleton
-public class BinanceMarketDataService extends AbstractBinanceService {
+public class BinanceMarketDataService extends AbstractBinanceService implements zaico.exchange.service.MarketDataService {
 
     @Inject ObjectMapper objectMapper;
 
@@ -22,6 +22,7 @@ public class BinanceMarketDataService extends AbstractBinanceService {
         super(clientProvider);
     }
 
+    @Override
     public BigDecimal getSpotTickerPrice(String symbol) {
         String raw = spotClient.createMarket().bookTicker(Map.of("symbol", symbol));
         try {
@@ -32,6 +33,7 @@ public class BinanceMarketDataService extends AbstractBinanceService {
         }
     }
 
+    @Override
     public BigDecimal getFuturesTickerPrice(FuturesType type, String symbol) {
         String raw = (type == FuturesType.USDT)
                 ? uFuturesClient.market().bookTicker(new LinkedHashMap<>(Map.of("symbol", symbol)))
@@ -44,6 +46,7 @@ public class BinanceMarketDataService extends AbstractBinanceService {
         }
     }
 
+    @Override
     public BinanceFundingRate getFundingRate(FuturesType type, String symbol) {
         String raw = (type == FuturesType.USDT)
                 ? uFuturesClient.market().fundingRate(new LinkedHashMap<>(Map.of("symbol", symbol)))

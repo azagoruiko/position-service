@@ -1,5 +1,6 @@
-package zaico.client.binance.dto;
+package zaico.client.binance.dto.mapper;
 
+import zaico.client.binance.dto.FuturesFundingEntry;
 import zaico.model.FundingEntry;
 
 import java.time.Instant;

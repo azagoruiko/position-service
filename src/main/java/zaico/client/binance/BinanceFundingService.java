@@ -3,9 +3,8 @@ package zaico.client.binance;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import zaico.client.binance.dto.BinanceFundingMapper;
 import zaico.client.binance.dto.BinanceFundingParser;
-import zaico.client.binance.dto.FuturesFundingEntry;
+import zaico.client.binance.dto.mapper.BinanceFundingMapper;
 import zaico.math.Pair;
 import zaico.model.FundingEntry;
 
@@ -13,7 +12,7 @@ import java.time.Instant;
 import java.util.*;
 
 @Singleton
-public class BinanceFundingService extends AbstractBinanceService {
+public class BinanceFundingService extends AbstractBinanceService implements zaico.exchange.service.FundingService {
 
     private final ObjectMapper objectMapper;
 
@@ -40,22 +39,21 @@ public class BinanceFundingService extends AbstractBinanceService {
         this.objectMapper = objectMapper;
     }
 
-
-
+    @Override
     public List<FundingEntry> getFunding(Pair pair) {
         return getFunding(pair, Optional.empty());
     }
 
+    @Override
     public List<FundingEntry> getFunding(Pair pair, Instant from) {
         return getFunding(pair, Optional.of(from));
     }
 
-    private List<FundingEntry> getFunding(Pair pair, Optional<Instant> from) {
+    @Override
+    public List<FundingEntry> getFunding(Pair pair, Optional<Instant> from) {
         List<FundingEntry> all = new ArrayList<>();
         all.addAll(fetchFuturesFunding(pair, FuturesType.USDT, from));
         all.addAll(fetchFuturesFunding(pair, FuturesType.COIN, from));
         return all;
     }
-
-
 }

@@ -1,5 +1,7 @@
-package zaico.client.binance.dto;
+package zaico.client.binance.dto.mapper;
 
+import zaico.client.binance.dto.FuturesOrder;
+import zaico.client.binance.dto.SpotOrder;
 import zaico.model.MarketType;
 import zaico.model.Order;
 

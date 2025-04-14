@@ -1,5 +1,9 @@
-package zaico.client.binance.dto;
+package zaico.client.binance.dto.mapper;
 
+import zaico.client.binance.dto.BinanceAssetTransfer;
+import zaico.client.binance.dto.BinanceEarnBalance;
+import zaico.client.binance.dto.BinanceFuturesBalance;
+import zaico.client.binance.dto.BinanceSpotBalance;
 import zaico.model.MarketType;
 import zaico.model.WalletBalance;
 import zaico.model.WalletTransaction;

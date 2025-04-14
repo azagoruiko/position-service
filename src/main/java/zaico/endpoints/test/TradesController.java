@@ -1,16 +1,15 @@
-package zaico.endpoints;
+package zaico.endpoints.test;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
 import jakarta.inject.Inject;
 import zaico.client.binance.BinanceTradeService;
-import zaico.client.binance.MarketRegistry;
+import zaico.exchange.service.MarketRegistry;
 import zaico.math.Pair;
 import zaico.model.MarketType;
 import zaico.model.Trade;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;

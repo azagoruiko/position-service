@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import zaico.client.binance.dto.ExchangeInfo;
+import zaico.exchange.service.MarketRegistry;
 import zaico.math.Pair;
 import zaico.model.MarketType;
 
@@ -16,7 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Singleton
-public class MarketRegistry {
+public class BinanceMarketRegistry implements MarketRegistry {
     @Inject
     BinanceCommissionService binanceCommissionService;
 
@@ -38,6 +39,7 @@ public class MarketRegistry {
         loaded = true;
     }
 
+    @Override
     public Pair getPair(String asset, String quote, MarketType type) {
         String symbol = switch (type) {
             case SPOT -> BinanceSymbol.getSpotSymbol(asset, quote);
@@ -57,6 +59,7 @@ public class MarketRegistry {
     }
 
 
+    @Override
     public boolean supports(MarketType type, String symbol) {
         initIfNeeded();
         return switch (type) {
@@ -67,6 +70,7 @@ public class MarketRegistry {
         };
     }
 
+    @Override
     public boolean supports(String symbol) {
         initIfNeeded();
         return supports(MarketType.SPOT, symbol)

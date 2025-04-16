@@ -3,6 +3,7 @@ package zaico.model;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Serdeable
 public record Trade(
@@ -16,4 +17,15 @@ public record Trade(
         String commissionAsset,
         long time,
         String sourceOrderId
-) {}
+) implements HistoryItem {
+
+    @Override
+    public long closedAt() {
+        return time;
+    }
+
+    @Override
+    public long openedAt() {
+        return time;
+    }
+}

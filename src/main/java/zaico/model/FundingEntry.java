@@ -13,4 +13,15 @@ public record FundingEntry(
         Instant time,
         String info,
         long tranId
-) {}
+) implements HistoryItem {
+
+    @Override
+    public long closedAt() {
+        return time.toEpochMilli();
+    }
+
+    @Override
+    public long openedAt() {
+        return time.toEpochMilli(); // funding начисляется сразу
+    }
+}

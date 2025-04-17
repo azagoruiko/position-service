@@ -18,4 +18,15 @@ public record Order(
         BigDecimal quoteQty,
         Instant updateTime,
         MarketType marketType // SPOT / FUTURES_USDT / FUTURES_COIN
-) {}
+)  implements HistoryItem {
+
+    @Override
+    public long closedAt() {
+        return updateTime.toEpochMilli();
+    }
+
+    @Override
+    public long openedAt() {
+        return updateTime.toEpochMilli();
+    }
+}

@@ -2,6 +2,7 @@ package zaico.client.binance.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.micronaut.serde.annotation.Serdeable;
+import zaico.model.HistoryItem;
 
 import java.math.BigDecimal;
 

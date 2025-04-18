@@ -18,9 +18,11 @@ public class BinancePositionService extends AbstractBinanceService implements za
     }
 
     private List<FuturesSnapshot> fetchFuturesPositions(FuturesType type) {
-        String raw = (type == FuturesType.USDT)
+        String raw = signedRequest( () ->
+                (type == FuturesType.USDT)
                 ? uFuturesClient.account().positionInformation(new LinkedHashMap<>())
-                : cFuturesClient.account().positionInformation(new LinkedHashMap<>());
+                : cFuturesClient.account().positionInformation(new LinkedHashMap<>())
+        );
 
         return parseFuturesPositions(raw).stream()
                 .map(p -> BinancePositionMapper.fromFutures(p, type.toMarketType()))

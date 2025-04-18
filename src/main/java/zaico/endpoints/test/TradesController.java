@@ -5,6 +5,7 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
 import jakarta.inject.Inject;
 import zaico.client.binance.BinanceTradeService;
+import zaico.exchange.service.CommissionService;
 import zaico.exchange.service.MarketRegistry;
 import zaico.math.Pair;
 import zaico.model.MarketType;
@@ -17,6 +18,8 @@ import java.util.Optional;
 
 @Controller("/facts")
 public class TradesController {
+    @Inject
+    CommissionService binanceCommissionService;
 
     @Inject
     BinanceTradeService binanceTradeService;
@@ -33,13 +36,13 @@ public class TradesController {
         if (asset.isPresent() && quote.isPresent()) {
             Pair pair = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(), MarketType.SPOT);
+                    quote.get(), MarketType.SPOT, binanceCommissionService);
             Pair pairFuturesM = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(), MarketType.FUTURES_USDT);
+                    quote.get(), MarketType.FUTURES_USDT, binanceCommissionService);
             Pair pairFuturesC = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(), MarketType.FUTURES_COIN);
+                    quote.get(), MarketType.FUTURES_COIN, binanceCommissionService);
 
             return from
                     .map(Instant::parse)

@@ -24,7 +24,7 @@ public class BinanceMarketDataService extends AbstractBinanceService implements 
 
     @Override
     public BigDecimal getSpotTickerPrice(String symbol) {
-        String raw = spotClient.createMarket().bookTicker(Map.of("symbol", symbol));
+        String raw = signedRequest(() ->spotClient.createMarket().bookTicker(Map.of("symbol", symbol)));
         try {
             BinanceBookTicker dto = objectMapper.readValue(raw, BinanceBookTicker.class);
             return dto.midPrice(); // или dto.bidPrice() / dto.askPrice() — на выбор
@@ -35,9 +35,11 @@ public class BinanceMarketDataService extends AbstractBinanceService implements 
 
     @Override
     public BigDecimal getFuturesTickerPrice(FuturesType type, String symbol) {
-        String raw = (type == FuturesType.USDT)
+        String raw = signedRequest(() ->
+                (type == FuturesType.USDT)
                 ? uFuturesClient.market().bookTicker(new LinkedHashMap<>(Map.of("symbol", symbol)))
-                : cFuturesClient.market().bookTicker(new LinkedHashMap<>(Map.of("symbol", symbol)));
+                : cFuturesClient.market().bookTicker(new LinkedHashMap<>(Map.of("symbol", symbol)))
+        );
         try {
             BinanceBookTicker dto = objectMapper.readValue(raw, BinanceBookTicker.class);
             return dto.midPrice();
@@ -48,9 +50,11 @@ public class BinanceMarketDataService extends AbstractBinanceService implements 
 
     @Override
     public BinanceFundingRate getFundingRate(FuturesType type, String symbol) {
-        String raw = (type == FuturesType.USDT)
+        String raw = signedRequest( () ->
+                (type == FuturesType.USDT)
                 ? uFuturesClient.market().fundingRate(new LinkedHashMap<>(Map.of("symbol", symbol)))
-                : cFuturesClient.market().fundingRate(new LinkedHashMap<>(Map.of("symbol", symbol)));
+                : cFuturesClient.market().fundingRate(new LinkedHashMap<>(Map.of("symbol", symbol)))
+        );
         try {
             List<BinanceFundingRate> list = objectMapper.readValue(raw, new TypeReference<>() {});
             return list.get(0); // берём ближайший

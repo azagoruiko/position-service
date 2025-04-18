@@ -24,9 +24,10 @@ public class BinanceFundingService extends AbstractBinanceService implements zai
         ));
         startTime.ifPresent(t -> params.put("startTime", t.toEpochMilli()));
 
-        String raw = (type == FuturesType.USDT)
+        String raw = signedRequest(() ->
+                (type == FuturesType.USDT)
                 ? uFuturesClient.account().getIncomeHistory(params)
-                : cFuturesClient.account().getIncomeHistory(params);
+                : cFuturesClient.account().getIncomeHistory(params));
 
         return BinanceFundingParser.parseFundingEntries(raw, objectMapper).stream()
                 .map(BinanceFundingMapper::fromDto)

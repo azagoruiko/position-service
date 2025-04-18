@@ -18,7 +18,8 @@ public class BinanceBalanceMapper {
                 dto.asset(),
                 dto.free().add(dto.locked()),
                 dto.free(),
-                MarketType.SPOT
+                MarketType.SPOT,
+                System.currentTimeMillis()
         );
     }
 
@@ -27,7 +28,8 @@ public class BinanceBalanceMapper {
                 dto.asset(),
                 dto.walletBalance(),
                 dto.availableBalance(),
-                type
+                type,
+                System.currentTimeMillis()
         );
     }
 
@@ -36,7 +38,8 @@ public class BinanceBalanceMapper {
                 "ALL",
                 dto.totalAmountInUSDT(),
                 dto.totalAmountInUSDT(),
-                MarketType.EARN
+                MarketType.EARN,
+                System.currentTimeMillis()
         );
     }
 

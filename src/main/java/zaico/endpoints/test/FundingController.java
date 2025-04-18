@@ -5,6 +5,7 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.QueryValue;
 import jakarta.inject.Inject;
 import zaico.client.binance.BinanceFundingService;
+import zaico.exchange.service.CommissionService;
 import zaico.exchange.service.MarketRegistry;
 import zaico.math.Pair;
 import zaico.model.FundingEntry;
@@ -17,6 +18,8 @@ import java.util.Optional;
 
 @Controller("/facts")
 public class FundingController {
+    @Inject
+    CommissionService binanceCommissionService;
 
     @Inject
     BinanceFundingService fundingService;
@@ -33,8 +36,8 @@ public class FundingController {
         if (asset.isPresent() && quote.isPresent()) {
             Instant fromDate = from.map(Instant::parse).orElse(Instant.now().minusSeconds(365 * 30 * 86400)); // по умолчанию — за 30 дней
 
-            Pair pairUSDT = marketRegistry.getPair(asset.get(), quote.get(), MarketType.FUTURES_USDT);
-            Pair pairCOIN = marketRegistry.getPair(asset.get(), quote.get(), MarketType.FUTURES_COIN);
+            Pair pairUSDT = marketRegistry.getPair(asset.get(), quote.get(), MarketType.FUTURES_USDT, binanceCommissionService);
+            Pair pairCOIN = marketRegistry.getPair(asset.get(), quote.get(), MarketType.FUTURES_COIN, binanceCommissionService);
 
             List<FundingEntry> entries = fundingService.getFunding(pairUSDT, fromDate);
             entries.addAll(fundingService.getFunding(pairCOIN, fromDate));

@@ -27,9 +27,10 @@ public class BinanceOrderService extends AbstractBinanceService implements zaico
         LinkedHashMap<String, Object> params = new LinkedHashMap<>(Map.of("symbol", symbol));
         startTime.ifPresent(t -> params.put("startTime", t.toEpochMilli()));
 
-        String raw = (type == FuturesType.USDT)
+        String raw = signedRequest( () -> (type == FuturesType.USDT)
                 ? uFuturesClient.account().allOrders(params)
-                : cFuturesClient.account().allOrders(params);
+                : cFuturesClient.account().allOrders(params)
+        );
 
         return parseFuturesOrders(raw).stream()
                 .map(o -> fromFutures(o, type.toMarketType()))

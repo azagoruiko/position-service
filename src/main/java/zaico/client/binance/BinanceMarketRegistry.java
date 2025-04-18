@@ -1,10 +1,11 @@
+// BinanceMarketRegistry.java
 package zaico.client.binance;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import zaico.client.binance.dto.ExchangeInfo;
+import zaico.exchange.service.CommissionService;
 import zaico.exchange.service.MarketRegistry;
 import zaico.math.Pair;
 import zaico.model.MarketType;
@@ -13,34 +14,45 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class BinanceMarketRegistry implements MarketRegistry {
-    @Inject
-    BinanceCommissionService binanceCommissionService;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Set<String> spotSymbols = new HashSet<>();
-    private final Set<String> usdtFuturesSymbols = new HashSet<>();
-    private final Set<String> coinFuturesSymbols = new HashSet<>();
+    private final Set<String> tradingQuotes = Set.of("USDT", "BTC", "BNB", "USDC", "ETH");
 
+    private final Map<MarketType, List<ExchangeInfo.Symbol>> symbolsByType = new EnumMap<>(MarketType.class);
     private boolean loaded = false;
 
     public synchronized void initIfNeeded() {
         if (loaded) return;
 
-        spotSymbols.addAll(loadSymbols("https://api.binance.com/api/v3/exchangeInfo"));
-        usdtFuturesSymbols.addAll(loadSymbols("https://fapi.binance.com/fapi/v1/exchangeInfo"));
-        coinFuturesSymbols.addAll(loadSymbols("https://dapi.binance.com/dapi/v1/exchangeInfo"));
+        symbolsByType.put(MarketType.SPOT, loadExchangeInfo("https://api.binance.com/api/v3/exchangeInfo"));
+        symbolsByType.put(MarketType.FUTURES_USDT, loadExchangeInfo("https://fapi.binance.com/fapi/v1/exchangeInfo"));
+        symbolsByType.put(MarketType.FUTURES_COIN, loadExchangeInfo("https://dapi.binance.com/dapi/v1/exchangeInfo"));
 
         loaded = true;
     }
 
+    private List<ExchangeInfo.Symbol> loadExchangeInfo(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            try (InputStream input = connection.getInputStream()) {
+                ExchangeInfo info = objectMapper.readValue(input, new TypeReference<>() {});
+                return info.symbols();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load exchange info from " + urlString, e);
+        }
+    }
+
     @Override
-    public Pair getPair(String asset, String quote, MarketType type) {
+    public Pair getPair(String asset, String quote, MarketType type, CommissionService commissionService) {
         String symbol = switch (type) {
             case SPOT -> BinanceSymbol.getSpotSymbol(asset, quote);
             case FUTURES_USDT -> BinanceSymbol.getFuturesSymbol(asset, quote, FuturesType.USDT);
@@ -49,51 +61,50 @@ public class BinanceMarketRegistry implements MarketRegistry {
         };
 
         BigDecimal commission = switch (type) {
-            case SPOT -> binanceCommissionService.getSpotTakerFee(symbol);
-            case FUTURES_USDT -> binanceCommissionService.getFuturesTakerFee(FuturesType.USDT, symbol);
-            case FUTURES_COIN -> binanceCommissionService.getFuturesTakerFee(FuturesType.COIN, symbol);
+            case SPOT -> commissionService.getSpotTakerFee(symbol);
+            case FUTURES_USDT -> commissionService.getFuturesTakerFee(FuturesType.USDT, symbol);
+            case FUTURES_COIN -> commissionService.getFuturesTakerFee(FuturesType.COIN, symbol);
             case EARN -> BigDecimal.ZERO;
         };
 
-        return new Pair(asset, quote, commission);
+        return new Pair(asset, quote, commission, symbol);
     }
-
 
     @Override
     public boolean supports(MarketType type, String symbol) {
         initIfNeeded();
-        return switch (type) {
-            case SPOT -> spotSymbols.contains(symbol);
-            case FUTURES_USDT -> usdtFuturesSymbols.contains(symbol);
-            case FUTURES_COIN -> coinFuturesSymbols.contains(symbol);
-            case EARN -> true;
-        };
+        return symbolsByType.getOrDefault(type, List.of()).stream()
+                .anyMatch(s -> s.symbol().equals(symbol));
     }
 
     @Override
     public boolean supports(String symbol) {
         initIfNeeded();
-        return supports(MarketType.SPOT, symbol)
-                || supports(MarketType.FUTURES_USDT, symbol)
-                || supports(MarketType.FUTURES_COIN, symbol);
+        return Arrays.stream(MarketType.values())
+                .anyMatch(type -> supports(type, symbol));
     }
 
-    private Set<String> loadSymbols(String urlString) {
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+    @Override
+    public Set<Pair> getRelevantPairs(MarketType type, Set<String> assets, CommissionService commissionService) {
+        initIfNeeded();
 
-            try (InputStream input = connection.getInputStream()) {
-                ExchangeInfo info = objectMapper.readValue(input, new TypeReference<>() {});
-                Set<String> symbols = new HashSet<>();
-                for (ExchangeInfo.Symbol s : info.symbols()) {
-                    symbols.add(s.symbol());
-                }
-                return symbols;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load exchange info from " + urlString, e);
-        }
+        return symbolsByType.getOrDefault(type, List.of()).stream()
+                .filter(s -> assets.contains(s.baseAsset()) && tradingQuotes.contains(s.quoteAsset()))
+                .map(s -> new Pair(
+                        s.baseAsset(),
+                        s.quoteAsset(),
+                        getCommissionForSymbol(type, s.symbol(), commissionService),
+                        s.symbol()
+                ))
+                .collect(Collectors.toSet());
+    }
+
+    private BigDecimal getCommissionForSymbol(MarketType type, String symbol, CommissionService commissionService) {
+        return switch (type) {
+            case SPOT -> commissionService.getSpotTakerFee(symbol);
+            case FUTURES_USDT -> commissionService.getFuturesTakerFee(FuturesType.USDT, symbol);
+            case FUTURES_COIN -> commissionService.getFuturesTakerFee(FuturesType.COIN, symbol);
+            case EARN -> BigDecimal.ZERO;
+        };
     }
 }

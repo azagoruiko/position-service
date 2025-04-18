@@ -38,13 +38,13 @@ public class OrdersController {
         if (asset.isPresent() && quote.isPresent()) {
             Pair pair = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(), MarketType.SPOT);
+                    quote.get(), MarketType.SPOT, binanceCommissionService);
             Pair pairFuturesM = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(), MarketType.FUTURES_USDT);
+                    quote.get(), MarketType.FUTURES_USDT, binanceCommissionService);
             Pair pairFuturesC = marketRegistry.getPair(
                     asset.get(),
-                    quote.get(), MarketType.FUTURES_COIN);
+                    quote.get(), MarketType.FUTURES_COIN, binanceCommissionService);
 
             return from
                     .map(Instant::parse)

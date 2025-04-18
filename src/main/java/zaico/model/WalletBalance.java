@@ -9,5 +9,17 @@ public record WalletBalance(
         String asset,
         BigDecimal total,
         BigDecimal available,
-        MarketType marketType
-) {}
+        MarketType marketType,
+        long fetchedAt
+) implements HistoryItem {
+
+    @Override
+    public long closedAt() {
+        return fetchedAt;
+    }
+
+    @Override
+    public long openedAt() {
+        return fetchedAt;
+    }
+}

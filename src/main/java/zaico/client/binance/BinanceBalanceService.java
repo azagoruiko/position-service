@@ -10,6 +10,7 @@ import zaico.client.binance.dto.mapper.BinanceBalanceMapper;
 import zaico.model.MarketType;
 import zaico.model.WalletBalance;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 
@@ -37,11 +38,20 @@ public class BinanceBalanceService extends AbstractBinanceService {
         }
     }
 
+    public List<WalletBalance> getSpotBalances(boolean nonZeroOnly) {
+        var balances = getSpotBalances();
+        return nonZeroOnly
+                ? balances.stream().filter(b -> b.total().signum() > 0).toList()
+                : balances;
+    }
+
     public List<WalletBalance> getFuturesBalances(FuturesType type) {
         try {
-            String raw = (type == FuturesType.USDT)
+            String raw = signedRequest(() ->
+                    (type == FuturesType.USDT)
                     ? uFuturesClient.account().accountInformation(new LinkedHashMap<>(Map.of()))
-                    : cFuturesClient.account().accountInformation(new LinkedHashMap<>(Map.of()));
+                    : cFuturesClient.account().accountInformation(new LinkedHashMap<>(Map.of()))
+            );
 
             JsonNode node = objectMapper.readTree(raw);
             List<BinanceFuturesBalance> assets = objectMapper.readValue(
@@ -56,6 +66,13 @@ public class BinanceBalanceService extends AbstractBinanceService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch futures balances", e);
         }
+    }
+
+    public List<WalletBalance> getFuturesBalances(FuturesType type, boolean nonZeroOnly) {
+        var balances = getFuturesBalances(type);
+        return nonZeroOnly
+                ? balances.stream().filter(b -> b.total().signum() > 0).toList()
+                : balances;
     }
 
     public List<WalletBalance> getEarnBalances() {
@@ -73,5 +90,12 @@ public class BinanceBalanceService extends AbstractBinanceService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch Earn balances", e);
         }
+    }
+
+    public List<WalletBalance> getEarnBalances(boolean nonZeroOnly) {
+        var balances = getEarnBalances();
+        return nonZeroOnly
+                ? balances.stream().filter(b -> b.total().signum() > 0).toList()
+                : balances;
     }
 }

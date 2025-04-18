@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class BinanceMarketRegistry implements MarketRegistry {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Set<String> tradingQuotes = Set.of("USDT", "BTC", "BNB", "USDC", "ETH");
+    private final Set<String> tradingQuotes = Set.of("USDT", "BTC", "BNB", "USDC", "ETH", "USD");
 
     private final Map<MarketType, List<ExchangeInfo.Symbol>> symbolsByType = new EnumMap<>(MarketType.class);
     private boolean loaded = false;

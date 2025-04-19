@@ -12,6 +12,7 @@ import zaico.model.WalletBalance;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Stream;
 
 
 @Singleton
@@ -77,20 +78,24 @@ public class BinanceBalanceService extends AbstractBinanceService {
 
     public List<WalletBalance> getEarnBalances() {
         try {
-            String raw = spotClient.createSimpleEarn().simpleAccount(new LinkedHashMap<>());
+            // Получаем позиции Earn: заблокированные и гибкие
+            var lockedJson = spotClient.createSimpleEarn().lockedProductPosition(new LinkedHashMap<>());
+            var flexibleJson = spotClient.createSimpleEarn().flexibleProductPosition(new LinkedHashMap<>());
 
-            List<BinanceEarnBalance> balances = objectMapper.readValue(
-                    raw, new TypeReference<>() {}
-            );
+            // Парсим обе части
+            var locked = objectMapper.readValue(lockedJson, BinanceEarnPositionResponse.class).rows();
+            var flexible = objectMapper.readValue(flexibleJson, BinanceEarnPositionResponse.class).rows();
 
-            return balances.stream()
+            // Объединяем и мапим в WalletBalance
+            return Stream.concat(locked.stream(), flexible.stream())
                     .map(BinanceBalanceMapper::fromEarn)
                     .toList();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch Earn balances", e);
+            throw new RuntimeException("❌ Failed to fetch Earn balances", e);
         }
     }
+
 
     public List<WalletBalance> getEarnBalances(boolean nonZeroOnly) {
         var balances = getEarnBalances();

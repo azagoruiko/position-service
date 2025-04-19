@@ -1,23 +1,25 @@
 package zaico.math;
 
 import org.junit.jupiter.api.Test;
+import zaico.exchange.Platform;
+import zaico.model.MarketType;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PairTest {
-
-    Pair pair = new Pair("BTC", "USDT", new BigDecimal("0.001")); // комиссия 0.1%
+    private BigDecimal commission = new BigDecimal("0.001");
+    Pair pair = new Pair(Platform.BINANCE, MarketType.SPOT, "BTC", "USDT"); // комиссия 0.1%
 
     @Test
     void testBuyWithQuoteCurrency() {
         BigDecimal usdt = new BigDecimal("10000");
         BigDecimal price = new BigDecimal("20000");
 
-        BigDecimal btcReceived = pair.buy(usdt, "USDT", price);
+        BigDecimal btcReceived = pair.buy(usdt, "USDT", price, commission);
         BigDecimal expected = usdt.divide(price, Calc.SCALE, BigDecimal.ROUND_HALF_UP)
-                .multiply(BigDecimal.ONE.subtract(pair.commission()));
+                .multiply(BigDecimal.ONE.subtract(commission));
 
         assertEquals(0, expected.compareTo(btcReceived));
     }
@@ -27,8 +29,8 @@ class PairTest {
         BigDecimal btc = new BigDecimal("0.5");
         BigDecimal price = new BigDecimal("20000");
 
-        BigDecimal usdtPaid = pair.buy(btc, "BTC", price);
-        BigDecimal expected = btc.multiply(price).multiply(BigDecimal.ONE.subtract(pair.commission()));
+        BigDecimal usdtPaid = pair.buy(btc, "BTC", price, commission);
+        BigDecimal expected = btc.multiply(price).multiply(BigDecimal.ONE.subtract(commission));
 
         assertEquals(0, expected.compareTo(usdtPaid));
     }
@@ -38,9 +40,9 @@ class PairTest {
         BigDecimal usdt = new BigDecimal("10000");
         BigDecimal price = new BigDecimal("20000");
 
-        BigDecimal btcReceived = pair.sell(usdt, "USDT", price); // эквивалентен buy(btc, "BTC", price)
+        BigDecimal btcReceived = pair.sell(usdt, "USDT", price, commission); // эквивалентен buy(btc, "BTC", price)
         BigDecimal expected = usdt.divide(price, Calc.SCALE, BigDecimal.ROUND_HALF_UP)
-                .multiply(BigDecimal.ONE.subtract(pair.commission()));
+                .multiply(BigDecimal.ONE.subtract(commission));
 
         assertEquals(0, expected.compareTo(btcReceived));
     }
@@ -50,8 +52,8 @@ class PairTest {
         BigDecimal btc = new BigDecimal("0.5");
         BigDecimal price = new BigDecimal("20000");
 
-        BigDecimal usdtReceived = pair.sell(btc, "BTC", price); // эквивалентен buy(usdt, "USDT", price)
-        BigDecimal expected = btc.multiply(price).multiply(BigDecimal.ONE.subtract(pair.commission()));
+        BigDecimal usdtReceived = pair.sell(btc, "BTC", price, commission); // эквивалентен buy(usdt, "USDT", price)
+        BigDecimal expected = btc.multiply(price).multiply(BigDecimal.ONE.subtract(commission));
 
         assertEquals(0, expected.compareTo(usdtReceived));
     }
@@ -59,7 +61,7 @@ class PairTest {
     @Test
     void testInvalidCurrency() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                pair.buy(new BigDecimal("1"), "ETH", new BigDecimal("1000"))
+                pair.buy(new BigDecimal("1"), "ETH", new BigDecimal("1000"), commission)
         );
         assertTrue(ex.getMessage().contains("is not a valid asset"));
     }
@@ -69,8 +71,8 @@ class PairTest {
         BigDecimal usdt = new BigDecimal("10000");
         BigDecimal price = new BigDecimal("20000");
 
-        BigDecimal expectedBtc = Calc.amount(usdt, price, pair.commission());
-        BigDecimal actualBtc = pair.buyWithQuote(usdt, price);
+        BigDecimal expectedBtc = Calc.amount(usdt, price, commission);
+        BigDecimal actualBtc = pair.buyWithQuote(usdt, price, commission);
 
         assertEquals(0, expectedBtc.compareTo(actualBtc));
     }
@@ -80,8 +82,8 @@ class PairTest {
         BigDecimal btc = new BigDecimal("0.5");
         BigDecimal price = new BigDecimal("20000");
 
-        BigDecimal expectedUsdt = Calc.size(btc, price, pair.commission());
-        BigDecimal actualUsdt = pair.sellForQuote(btc, price);
+        BigDecimal expectedUsdt = Calc.size(btc, price, commission);
+        BigDecimal actualUsdt = pair.sellForQuote(btc, price, commission);
 
         assertEquals(0, expectedUsdt.compareTo(actualUsdt));
     }

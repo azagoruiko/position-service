@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Singleton;
 import zaico.client.binance.dto.ExchangeInfo;
+import zaico.exchange.Platform;
 import zaico.exchange.service.CommissionService;
 import zaico.exchange.service.MarketRegistry;
 import zaico.math.Pair;
@@ -67,7 +68,7 @@ public class BinanceMarketRegistry implements MarketRegistry {
             case EARN -> BigDecimal.ZERO;
         };
 
-        return new Pair(asset, quote, commission, symbol);
+        return new Pair(Platform.BINANCE, type, asset, quote, symbol);
     }
 
     @Override
@@ -88,12 +89,15 @@ public class BinanceMarketRegistry implements MarketRegistry {
     public Set<Pair> getRelevantPairs(MarketType type, Set<String> assets, CommissionService commissionService) {
         initIfNeeded();
 
-        return symbolsByType.getOrDefault(type, List.of()).stream()
+        var searchType = type != MarketType.EARN ? type : MarketType.SPOT;
+
+        return symbolsByType.getOrDefault(searchType, List.of()).stream()
                 .filter(s -> assets.contains(s.baseAsset()) && tradingQuotes.contains(s.quoteAsset()))
                 .map(s -> new Pair(
+                        Platform.BINANCE,
+                        searchType,
                         s.baseAsset(),
                         s.quoteAsset(),
-                        getCommissionForSymbol(type, s.symbol(), commissionService),
                         s.symbol()
                 ))
                 .collect(Collectors.toSet());

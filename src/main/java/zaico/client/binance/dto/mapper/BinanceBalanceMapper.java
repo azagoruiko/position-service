@@ -35,11 +35,11 @@ public class BinanceBalanceMapper {
 
     public static WalletBalance fromEarn(BinanceEarnBalance dto) {
         return new WalletBalance(
-                "ALL",
-                dto.totalAmountInUSDT(),
-                dto.totalAmountInUSDT(),
+                dto.asset(),
+                dto.balance(),
+                dto.balance(), // здесь без учёта наград, можно будет расширить
                 MarketType.EARN,
-                System.currentTimeMillis()
+                dto.purchaseTime()
         );
     }
 

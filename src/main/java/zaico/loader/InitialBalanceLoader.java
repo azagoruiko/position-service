@@ -13,8 +13,10 @@ import zaico.client.binance.FuturesType;
 import zaico.exchange.Platform;
 import zaico.exchange.service.CommissionService;
 import zaico.exchange.service.MarketRegistry;
+import zaico.exchange.service.OrderService;
 import zaico.math.Pair;
 import zaico.model.MarketType;
+import zaico.model.Order;
 import zaico.model.Trade;
 import zaico.model.WalletBalance;
 import zaico.service.DataRepository;
@@ -28,6 +30,8 @@ public class InitialBalanceLoader implements ApplicationEventListener<ServerStar
 
     @Inject BinanceBalanceService balanceService;
     @Inject BinanceTradeService tradeService;
+    @Inject
+    OrderService orderService;
     @Inject DataRepository repository;
     @Inject MarketRegistry marketRegistry;
     @Inject
@@ -78,8 +82,10 @@ public class InitialBalanceLoader implements ApplicationEventListener<ServerStar
 
             balances.forEach(w -> repository.setWallet(platform, type, w));
 
+
+
             assetsByMarket
-                    .computeIfAbsent(type, k -> new HashSet<>())
+                    .computeIfAbsent(type == MarketType.EARN ? MarketType.SPOT : type, k -> new HashSet<>())
                     .addAll(balances.stream().map(WalletBalance::asset).collect(Collectors.toSet()));
         }
 
@@ -94,8 +100,13 @@ public class InitialBalanceLoader implements ApplicationEventListener<ServerStar
             for (Pair pair : pairs) {
                 Runnable job = () -> {
                     try {
+                        // Load orders
+                        List<Order> orders = orderService.getOrders(pair);
+                        repository.getOrCreate(platform, type, pair).addOrder(orders);
+                        System.out.printf("📥 Loaded %d orders for %s%n", orders.size(), pair);
+
                         List<Trade> trades = tradeService.getTrades(pair);
-                        repository.getOrCreate(platform, type, pair).getTrades().addAll(trades);
+                        repository.getOrCreate(platform, type, pair).addTrades(trades);
                         System.out.printf("📥 Loaded %d trades for %s%n", trades.size(), pair);
                     } catch (Exception e) {
                         System.err.printf("❌ Failed to load trades for %s: %s%n", pair, e.getMessage());
